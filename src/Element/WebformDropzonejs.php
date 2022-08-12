@@ -94,7 +94,7 @@ class WebformDropzonejs extends DropzoneJs {
 
           $files[] = [
             'id' => $file->id(),
-            'path' => $file->url(),
+            'path' => $file->createFileUrl(FALSE),
             'name' => $file->getFilename(),
             'size' => $file->getSize(),
             'accepted' => TRUE,
