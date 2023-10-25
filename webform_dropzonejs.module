@@ -5,4 +5,28 @@
  * Adds dropzone.js field type to the webforms module.
  */
 
- require_once __DIR__ . '/includes/webform_dropzonejs.theme.inc';
+/**
+ * Implements hook_theme().
+ */
+function webform_dropzonejs_theme() {
+  $info = [
+    'webform_element_dropzonejs' => [
+      'variables' => [
+        'element' => [],
+        'value' => NULL,
+        'webform_submission' => NULL,
+        'options' => [],
+        'file' => NULL,
+      ],
+    ],
+  ];
+
+  return $info;
+}
+
+/**
+ * Preprocesses "webform_element_dropzonejs".
+ */
+function template_preprocess_webform_element_dropzonejs(array &$variables) {
+  template_preprocess_webform_element_managed_file($variables);
+}

@@ -6,7 +6,7 @@ integration:
     theme:
       css/webform_dropzonejs.integration.css: {}
   dependencies:
-    - core/jquery.once
+    - core/once
     - core/drupal
     - core/drupalSettings
     - dropzonejs/dropzonejs

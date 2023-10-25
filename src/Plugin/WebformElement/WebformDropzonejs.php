@@ -3,11 +3,9 @@
 namespace Drupal\webform_dropzonejs\Plugin\WebformElement;
 
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\webform\Plugin\WebformElement\WebformManagedFileBase;
-use Drupal\webform\WebformSubmissionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
+use Drupal\webform\Plugin\WebformElement\WebformManagedFileBase;
 
 /**
  * Provides a 'webform_dropzonejs' element.
@@ -24,7 +22,7 @@ class WebformDropzonejs extends WebformManagedFileBase {
 
   /**
    * {@inheritdoc}
-   * 
+   *
    * This is the admin form.
    */
   public function form(array $form, FormStateInterface $form_state) {
@@ -45,16 +43,18 @@ class WebformDropzonejs extends WebformManagedFileBase {
   public static function validateManagedFile(array &$element, FormStateInterface $form_state, &$complete_form) {
     // If this field is being loaded with existing files, we need to make sure
     // those files are attached to the field if they were not deleted.
-    $fids = isset($element['#default_value']) ? $element['#default_value'] : [];
+    $fids = $element['#default_value'] ?? [];
     $files = [];
-    
+
     if (!empty($fids)) {
-      $check_if_deleted = isset($_POST['deleted_dropzone_files']) ? TRUE : FALSE;
+      $deleted_dropzone_files = \Drupal::requestStack()->getCurrentRequest()->request->get('deleted_dropzone_files');
+      $check_if_deleted = isset($deleted_dropzone_files) ? TRUE : FALSE;
       foreach ($fids as $file_key => $fid) {
-        if ($check_if_deleted && in_array($fid, $_POST['deleted_dropzone_files'])) {
-          // This file was attached to this submission, but now it should be 
+        if ($check_if_deleted && in_array($fid, $deleted_dropzone_files)) {
+          // This file was attached to this submission, but now it should be
           // deleted.
-          EntityStorageInterface::delete($fid);
+          $file_storage = \Drupal::entityTypeManager()->getStorage('file');
+          $file_storage->delete($fid);
           unset($fids[$file_key]);
           continue;
         }
@@ -75,7 +75,7 @@ class WebformDropzonejs extends WebformManagedFileBase {
 
         // Save the file as a permanent file.
         if ($file_data = file_get_contents($dropzone_file['path'])) {
-          if ($final_file = file_save_data($file_data, $file_name, FileSystemInterface::EXISTS_RENAME)) {
+          if ($final_file = \Drupal::service('file.repository')->writeData($file_data, $file_name, FileSystemInterface::EXISTS_RENAME)) {
             $fid = $final_file->id();
             $files[] = $final_file;
             $fids[] = $fid;
