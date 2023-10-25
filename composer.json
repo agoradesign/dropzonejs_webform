@@ -1,0 +1,11 @@
+{
+    "name": "drupal/dropzonejs_webform",
+    "description": "This module creates a new DropzoneJS element that you can add to webforms. It provides a user-friendly way for users to upload multiple files in a form field.",
+    "type": "drupal-module",
+    "homepage": "https://www.drupal.org/project/dropzonejs_webform",
+    "license": "GPL-2.0-or-later",
+    "minimum-stability": "dev",
+    "require": {
+        "drupal/core": "^9 || ^10"
+    }
+}
