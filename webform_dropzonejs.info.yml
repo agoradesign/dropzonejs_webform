@@ -2,8 +2,7 @@ name: 'Webform DropzoneJS'
 type: module
 description: 'Provides a DropzoneJS Webform element.'
 package: 'Webform'
-core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^9 || ^10
 dependencies:
   - 'webform:webform'
   - 'dropzonejs:dropzonejs'

@@ -2,17 +2,11 @@
 
 namespace Drupal\webform_dropzonejs\Element;
 
-use Drupal\webform\Element\WebformManagedFileBase;
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\File\Event\FileUploadSanitizeNameEvent;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\dropzonejs\Element\DropzoneJs;
 use Drupal\file\Entity\File;
-
-use Drupal\Component\Utility\Bytes;
-use Drupal\Component\Utility\Html;
-use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element\FormElement;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Url;
 use Drupal\webform\Utility\WebformElementHelper;
 
 /**
@@ -21,6 +15,7 @@ use Drupal\webform\Utility\WebformElementHelper;
  * @FormElement("webform_dropzonejs")
  */
 class WebformDropzonejs extends DropzoneJs {
+
   /**
    * {@inheritdoc}
    */
@@ -43,7 +38,7 @@ class WebformDropzonejs extends DropzoneJs {
    * {@inheritdoc}
    */
   public static function preRenderDropzoneJs(array $element) {
-    // Grab the maximum number of files allowed. This is based on the 
+    // Grab the maximum number of files allowed. This is based on the
     // $element['#multiple'] value:
     // - When this value is not set, only allow one.
     // - When this value equals TRUE, allow unlimited.
@@ -59,7 +54,7 @@ class WebformDropzonejs extends DropzoneJs {
     }
 
     $element['#dropzone_description'] = t('Drop files here to upload them');
-    $element['#extensions'] = isset($element['#upload_validators']['file_validate_extensions'][0]) ? $element['#upload_validators']['file_validate_extensions'][0] : '';
+    $element['#extensions'] = $element['#upload_validators']['file_validate_extensions'][0] ?? '';
     $element['#max_files'] = $max_files;
     $element['#max_filesize'] = !empty($element['#max_filesize']) ? $element['#max_filesize'] . 'M' : '';
     $element = parent::preRenderDropzoneJs($element);
@@ -84,12 +79,12 @@ class WebformDropzonejs extends DropzoneJs {
         if ($file = File::load($fid)) {
           // Is this file an image?
           $is_image = FALSE;
-          switch($file->getMimeType()) {
+          switch ($file->getMimeType()) {
             case 'image/jpeg':
             case 'image/gif':
             case 'image/png':
               $is_image = TRUE;
-              break;            
+              break;
           }
 
           $files[] = [
@@ -110,8 +105,8 @@ class WebformDropzonejs extends DropzoneJs {
     // Define a variable where the files will be uploaded to make it easier
     // to link to them in the JS.
     $element['#attached']['drupalSettings']['webformDropzoneJs'][$element_id]['file_directory'] = str_replace(
-      array('private://', '_sid_'), 
-      array('/system/files/', $element['#webform_submission']), 
+      ['private://', '_sid_'],
+      ['/system/files/', $element['#webform_submission']],
       $element['#upload_location']
     );
 
@@ -120,7 +115,10 @@ class WebformDropzonejs extends DropzoneJs {
 
     // Add validate callback.
     $element += ['#element_validate' => []];
-    array_unshift($element['#element_validate'], [get_called_class(), 'validateWebformDropzonejs']);
+    array_unshift($element['#element_validate'], [
+      get_called_class(),
+      'validateWebformDropzonejs',
+    ]);
 
     return $element;
   }
@@ -147,16 +145,18 @@ class WebformDropzonejs extends DropzoneJs {
         $file_names = array_filter(explode(';', $user_input['uploaded_files']));
         $tmp_upload_scheme = \Drupal::configFactory()->get('dropzonejs.settings')->get('tmp_upload_scheme');
 
-        foreach ($file_names as $name) { 
+        foreach ($file_names as $name) {
           // The upload handler appended the txt extension to the file for
           // security reasons. We will remove it in this callback.
           $old_filepath = $tmp_upload_scheme . '://' . $name;
-          
+
           // The upload handler appended the txt extension to the file for
           // security reasons. Because here we know the acceptable extensions
           // we can remove that extension and sanitize the filename.
           $name = self::fixTmpFilename($name);
-          $name = file_munge_filename($name, self::getValidExtensions($element));
+          $event = new FileUploadSanitizeNameEvent($name, self::getValidExtensions($element));
+          \Drupal::service('event_dispatcher')->dispatch($event);
+          $name = $event->getFilename();
 
           // Create the correct file extension path.
           $new_filepath = $tmp_upload_scheme . '://' . $name;
@@ -172,13 +172,14 @@ class WebformDropzonejs extends DropzoneJs {
               'path' => $new_filepath,
               'filename' => $name,
             ];
-          }          
+          }
         }
 
         $form_state->setValueForElement($element, $return);
       }
-      
+
     }
     return $return;
   }
+
 }

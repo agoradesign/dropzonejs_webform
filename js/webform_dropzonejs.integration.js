@@ -5,7 +5,7 @@
  * Defines the behaviors needed for webform dropzonejs integration.
  */
 
-(function ($, Drupal, drupalSettings) {
+(function ($, Drupal, drupalSettings, once) {
   'use strict';
 
   Drupal.behaviors.webformDropzonejsIntegraion = {
@@ -13,16 +13,16 @@
 
       Dropzone.autoDiscover = false;
 
-      $('.dropzone-enable', context).once('webformDropzoneJs').each(function () {
-        var $object = $(this);
+      once('webformDropzoneJs', '.dropzone-enable', context).forEach(function (dropzone) {
+        var $object = $(dropzone);
         var $form = $object.closest('form');
 
         // This is the value that is set for the dropzonejs instance.
         var dropzoneId = $object.attr('id');
 
         if (
-          typeof drupalSettings.webformDropzoneJs == "undefined" || 
-          drupalSettings.webformDropzoneJs[dropzoneId].length < 1 || 
+          typeof drupalSettings.webformDropzoneJs == "undefined" ||
+          drupalSettings.webformDropzoneJs[dropzoneId].length < 1 ||
           drupalSettings.dropzonejs.instances[dropzoneId].instance.length < 1) {
           return;
         }
@@ -46,7 +46,7 @@
             file.is_default = true;
             thisDropzone.emit('addedfile', file);
             thisDropzone.files.push(file);
-            
+
             // Display a thumb of the file if it is an image.
             if (file.is_image) {
               thisDropzone.emit('thumbnail', file, file.path);
@@ -85,4 +85,4 @@
     }
   };
 
-}(jQuery, Drupal, drupalSettings));
+}(jQuery, Drupal, drupalSettings, once));
