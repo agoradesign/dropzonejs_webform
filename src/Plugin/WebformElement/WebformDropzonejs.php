@@ -75,7 +75,7 @@ class WebformDropzonejs extends WebformManagedFileBase {
 
         // Save the file as a permanent file.
         if ($file_data = file_get_contents($dropzone_file['path'])) {
-          if ($final_file = \Drupal::service('file.repository')->writeData($file_data, $file_name, FileSystemInterface::EXISTS_RENAME)) {
+          if ($final_file = file_save_data($file_data, $file_name, FileSystemInterface::EXISTS_RENAME)) {
             $fid = $final_file->id();
             $files[] = $final_file;
             $fids[] = $fid;
