@@ -1,0 +1,14 @@
+{
+    "name": "agoradesign/webform_dropzonejs",
+    "description": "Provides a DropzoneJS Webform element.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+        "drupal/dropzone": "~2.11"
+    },
+    "suggest": {
+        "enyo/dropzone": "Required to use drupal/dropzonejs. DropzoneJS is an open source library that provides drag’n’drop file uploads with image previews."
+    }
+}
