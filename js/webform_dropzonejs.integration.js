@@ -13,7 +13,7 @@
 
       Dropzone.autoDiscover = false;
 
-      $('.dropzone-enable', context).once('webformDropzoneJs').each(function () {
+      $(once('webformDropzoneJs', '.dropzone-enable', context)).each(function () {
         var $object = $(this);
         var $form = $object.closest('form');
 
@@ -21,8 +21,8 @@
         var dropzoneId = $object.attr('id');
 
         if (
-          typeof drupalSettings.webformDropzoneJs == "undefined" || 
-          drupalSettings.webformDropzoneJs[dropzoneId].length < 1 || 
+          typeof drupalSettings.webformDropzoneJs == "undefined" ||
+          drupalSettings.webformDropzoneJs[dropzoneId].length < 1 ||
           drupalSettings.dropzonejs.instances[dropzoneId].instance.length < 1) {
           return;
         }
@@ -46,7 +46,7 @@
             file.is_default = true;
             thisDropzone.emit('addedfile', file);
             thisDropzone.files.push(file);
-            
+
             // Display a thumb of the file if it is an image.
             if (file.is_image) {
               thisDropzone.emit('thumbnail', file, file.path);
